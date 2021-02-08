@@ -1,6 +1,6 @@
 var pssport = require('passport');
 var LocalStratergy = require('passport-local').Strategy;
-var User = require('./models/user');
+var User = require('../models/user');
 const passport = require('passport');
 var JwtStratergy = require('passport-jwt').Strategy;
 var ExtractJwt = require('passport-jwt').ExtractJwt;
