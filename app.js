@@ -8,6 +8,7 @@ const url=config.mongoUrl;
 const connect = mongoose.connect(url);
 const endpoints = require('./endpoints');
 const memeRouter = require("./modules/meme/router");
+const enableCORS = require('./utils/cors');
 
 connect.then((db)=>{
   console.log('Connected to the server!!!');
@@ -15,6 +16,7 @@ connect.then((db)=>{
 var app = express();
 let port = process.env.PORT || 3000;
 app.listen(port, () => {  console.log('We are live on ' + port);});
+enableCORS(app);
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
