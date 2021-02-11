@@ -18,9 +18,20 @@ exports.getAllMemes = async (req, res, next) => {
     try {
         const memes = await Meme.find({}).sort({createdAt: "desc"}).limit(100);
 
+        let memeArr = []
+        for(const meme of memes){
+            const memeNow = {
+                id:meme.id,
+                caption:meme.caption,
+                url:meme.url,
+                name: meme.name
+            }
+            memeArr.push(memeNow);
+        }
+
         res.statusCode = respStatus.status.StatusOk;
         res.setHeader('Content-Type', 'application/json');
-        res.json(memes);
+        res.json(memeArr);
     }
     catch (e) {
         console.log(e);

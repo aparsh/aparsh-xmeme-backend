@@ -8,11 +8,6 @@ const Schema = mongoose.Schema;
 const uuid = require('uuid');
 
 const MemeSchema = new Schema({
-    _id:{
-        type:String,
-        default:uuid.v4(),
-        unique:true
-    },
     name: {
         type : String,
         required: true
