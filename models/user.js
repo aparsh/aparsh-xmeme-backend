@@ -1,3 +1,8 @@
+/**
+ * xMEME-Backend
+ * created By - aparsh
+ * February 2021
+ */
 var mongoose = require('mongoose');
 //require('mongoose-type-email');
 var Schema = mongoose.Schema;

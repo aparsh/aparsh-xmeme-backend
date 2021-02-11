@@ -1,12 +1,18 @@
+/**
+ * xMEME-Backend
+ * created By - aparsh
+ * February 2021
+ */
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const shortid = require('shortid');
+const uuid = require('uuid');
 
 const MemeSchema = new Schema({
-    _id: {
-        type: String,
-        default: shortid.generate()
-      },
+    _id:{
+        type:String,
+        default:uuid.v4(),
+        unique:true
+    },
     name: {
         type : String,
         required: true

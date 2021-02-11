@@ -1,21 +1,26 @@
+/**
+ * xMEME-Backend
+ * created By - aparsh
+ * February 2021
+ */
+
 const Meme = require("../../../models/meme");
 const User = require("../../../models/user");
 const respStatus = require('../../../global/responseStatus');
 const shortid = require('shortid');
 
 
-
+/**
+ * Fetch latest 100 memes sorted based on post time.
+ * GET /memes
+ */
 exports.getAllMemes = async (req, res, next) => {
     try {
-        const memes = await Meme.find({});
+        const memes = await Meme.find({}).sort({createdAt: "desc"}).limit(100);
 
-        let response = {
-            status : "success",
-            data : memes
-        }
         res.statusCode = respStatus.status.StatusOk;
         res.setHeader('Content-Type', 'application/json');
-        res.json(response);
+        res.json(memes);
     }
     catch (e) {
         console.log(e);
@@ -29,18 +34,17 @@ exports.getAllMemes = async (req, res, next) => {
     }
 }
 
-
+/**
+ * Fetch a single meme using id
+ * GET /memes/uuid
+ */
 exports.getMeme = async (req, res, next) => {
     try {
         const memeId = req.params.uuid;
-        const memes = Meme.find({uuid:memeId}).lean();
-        let response = {
-            status : "success",
-            data : memes
-        }
+        const meme = Meme.findById(memeId).lean();
         res.statusCode = respStatus.status.StatusOk;
         res.setHeader('Content-Type', 'application/json');
-        res.json(response);
+        res.json(meme);
     }
     catch (e) {
         console.log(e);
@@ -54,7 +58,9 @@ exports.getMeme = async (req, res, next) => {
     }
 }
 
-
+/**
+ * validate the schema of post request 
+ */
 exports.postMemeValidation = (req, res, next) => {
     if(req.body.name == "" || req.body.name == undefined){
         res.status(respStatus.status.StatusBadRequest).json({status: "faliure", message: "name missing"});
@@ -67,6 +73,10 @@ exports.postMemeValidation = (req, res, next) => {
     next();
 }
 
+/**
+ * Post a meme
+ * POST /memes
+ */
 exports.postMeme = async (req, res, next) => {
     try {
         let reqBody = req.body;
@@ -87,8 +97,6 @@ exports.postMeme = async (req, res, next) => {
         }
         else {
             let response = {
-                status : "success",
-                message : "meme posted successfully.",
                 id : savedMeme._id
             }
             res.status(respStatus.status.StatusOk).json(response);
@@ -103,7 +111,10 @@ exports.postMeme = async (req, res, next) => {
         res.status(respStatus.status.StatusInternalServerError).json(response);
     }
 }
-
+/**
+ * Edit the caption or url of an already posted meme
+ * PATCH /memes/uuid
+ */
 exports.editMeme = async (req, res, next) => {
     try {
         let reqBody = req.body;
