@@ -112,7 +112,7 @@ exports.editMeme = async (req, res, next) => {
             meme.caption = reqBody.caption;
         }
         if(reqBody.url){
-            meme.caption = reqBody.meme;
+            meme.url = reqBody.url;
         }
         let savedMeme = await meme.save();
         if (!savedMeme) {
