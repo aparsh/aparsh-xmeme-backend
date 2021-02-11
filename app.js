@@ -9,6 +9,7 @@ const connect = mongoose.connect(url);
 const endpoints = require('./endpoints');
 const memeRouter = require("./modules/meme/router");
 const allowCrossDomain = require('./utils/cors');
+const expressValidator = require('express-validator');
 
 connect.then((db)=>{
   console.log('Connected to the server!!!');
@@ -21,7 +22,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(expressValidator());
 endpoints.initialise(app);
 
 // catch 404 and forward to error handler
@@ -37,7 +38,10 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.json({
+    message: err.message,
+    error: err
+  });
 });
 
 module.exports = app;

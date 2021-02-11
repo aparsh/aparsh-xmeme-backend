@@ -1,7 +1,6 @@
 const Meme = require("../../../models/meme");
 const User = require("../../../models/user");
 const respStatus = require('../../../global/responseStatus');
-const { body,check, validationResult } = require('express-validator');
 const shortid = require('shortid');
 
 
@@ -56,22 +55,20 @@ exports.getMeme = async (req, res, next) => {
 }
 
 
-exports.postMemeValidation = () => {
-    return [
-        body('name', 'userName not exists').exists(),
-        body('url', 'meme link not exists').exists(),
-        body('caption').optional()
-       ];
+exports.postMemeValidation = (req, res, next) => {
+    if(req.body.name == "" || req.body.name == undefined){
+        res.status(respStatus.status.StatusBadRequest).json({status: "faliure", message: "name missing"});
+        return;
+    }
+    if(req.body.url == "" || req.body.url == undefined){
+        res.status(respStatus.status.StatusBadRequest).json({status: "faliure", message: "url missing"});
+        return;
+    }
+    next();
 }
 
 exports.postMeme = async (req, res, next) => {
     try {
-        console.log("post meme!")
-        const errors = await validationResult(req);
-        if (!errors.isEmpty()) {
-            res.status(respStatus.status.StatusBadRequest).json({status: "faliure", message: "Wrong request body"});
-            return;
-        }
         let reqBody = req.body;
         reqBody.caption = reqBody.caption ? reqBody.caption : "";
         
@@ -107,27 +104,16 @@ exports.postMeme = async (req, res, next) => {
     }
 }
 
-exports.editMemeValidation = () => {
-    return [
-        body('url', 'meme link not exists').exists(),
-        body('caption', 'caption not passed').exists(),
-        body('id').optional(),
-       ];
-}
-
 exports.editMeme = async (req, res, next) => {
     try {
-        
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            res.status(respStatus.status.StatusBadRequest).json({status: "faliure", message: "Wrong request body"});
-            return;
-        }
-
         let reqBody = req.body;
-        let meme = await Meme.findById(reqBody.id);
-        meme.caption = reqBody.caption;
-        meme.meme = reqBody.meme;
+        let meme = await Meme.findById(req.params.uuid);
+        if(reqBody.caption){
+            meme.caption = reqBody.caption;
+        }
+        if(reqBody.url){
+            meme.caption = reqBody.meme;
+        }
         let savedMeme = await meme.save();
         if (!savedMeme) {
             let response = {
@@ -145,6 +131,7 @@ exports.editMeme = async (req, res, next) => {
         }
     }
     catch (e) {
+        console.log(e)
         let response = {
             status : "faliure",
             message : "something went wrong"
