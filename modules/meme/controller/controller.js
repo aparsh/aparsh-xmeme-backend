@@ -4,8 +4,9 @@
  * February 2021
  */
 
-const Meme = require("../../../models/meme");
-const User = require("../../../models/user");
+// const Meme = require("../../../models/meme");
+var db = require('node-localdb');
+var Meme = db('../../../db/meme.json');
 const respStatus = require('../../../global/responseStatus');
 const shortid = require('shortid');
 
@@ -16,19 +17,20 @@ const shortid = require('shortid');
  */
 exports.getAllMemes = async (req, res, next) => {
     try {
-        const memes = await Meme.find({}).sort({createdAt: "desc"}).limit(100);
+        const memeNums = await Meme.count({});
+        const memes = await Meme.find({},{skip:Math.max(memeNums-100,0)});
 
         let memeArr = []
         for(const meme of memes){
             const memeNow = {
-                id:meme.id,
+                id:meme._id,
                 caption:meme.caption,
                 url:meme.url,
                 name: meme.name
             }
             memeArr.push(memeNow);
         }
-
+        memeArr = memeArr.reverse()
         res.statusCode = respStatus.status.StatusOk;
         res.setHeader('Content-Type', 'application/json');
         res.json(memeArr);
@@ -52,10 +54,30 @@ exports.getAllMemes = async (req, res, next) => {
 exports.getMeme = async (req, res, next) => {
     try {
         const memeId = req.params.uuid;
-        const meme = Meme.findById(memeId).lean();
-        res.statusCode = respStatus.status.StatusOk;
-        res.setHeader('Content-Type', 'application/json');
-        res.json(meme);
+        let meme = await Meme.findOne({_id:memeId});
+
+        // console.log(meme);
+        
+        if(!meme){
+            let response = {
+                status : "faliure",
+                message : "meme not found"
+            }
+            res.statusCode = respStatus.status.StatusNotFound;
+            res.setHeader('Content-Type', 'application/json');
+            res.json(response);
+        }
+        else{
+            let memeRes = {
+                id:meme._id,
+                caption:meme.caption,
+                url:meme.url,
+                name: meme.name
+            }
+            res.statusCode = respStatus.status.StatusOk;
+            res.setHeader('Content-Type', 'application/json');
+            res.json(memeRes);
+        }
     }
     catch (e) {
         console.log(e);
@@ -93,13 +115,14 @@ exports.postMeme = async (req, res, next) => {
         let reqBody = req.body;
         reqBody.caption = reqBody.caption ? reqBody.caption : "";
         
-        let newMeme = await new Meme({
+        let newMeme = {
             name: reqBody.name,
             url: reqBody.url,
-            caption: reqBody.caption});
+            caption: reqBody.caption};
+        
+        let savedMeme = await Meme.insert(newMeme); 
 
-        let savedMeme = await newMeme.save();
-        if (!savedMeme) {
+        if (savedMeme.isRejected) {
             let response = {
                 status : "faliure",
                 message : "unable to post your meme at the moment."
@@ -129,14 +152,26 @@ exports.postMeme = async (req, res, next) => {
 exports.editMeme = async (req, res, next) => {
     try {
         let reqBody = req.body;
-        let meme = await Meme.findById(req.params.uuid);
+        let meme = await Meme.findOne({_id:req.params.uuid});
+        
+        if(!meme){
+            let response = {
+                status : "faliure",
+                message : "meme not found"
+            }
+            res.statusCode = respStatus.status.StatusNotFound;
+            res.setHeader('Content-Type', 'application/json');
+            res.json(response);
+            next();
+        }
+
         if(reqBody.caption){
             meme.caption = reqBody.caption;
         }
         if(reqBody.url){
             meme.url = reqBody.url;
         }
-        let savedMeme = await meme.save();
+        let savedMeme = await Meme.update({_id:meme._id},meme);
         if (!savedMeme) {
             let response = {
                 status : "faliure",

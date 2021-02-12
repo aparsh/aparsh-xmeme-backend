@@ -11,7 +11,7 @@ router.use(bodyparser.json());
 
 
 router.get("/",controller.getAllMemes)
-router.get("/:uuid",controller.getAllMemes)
+router.get("/:uuid",controller.getMeme)
 router.post("/",controller.postMemeValidation, controller.postMeme)
 router.patch("/:uuid",controller.editMeme)
 
