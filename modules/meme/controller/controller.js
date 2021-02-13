@@ -5,8 +5,8 @@
  */
 
 // const Meme = require("../../../models/meme");
-var db = require('node-localdb');
-var Meme = db('../../../db/meme.json');
+var path = require('path');
+const Meme = require('../../../db/memeDB')
 const respStatus = require('../../../global/responseStatus');
 const shortid = require('shortid');
 
